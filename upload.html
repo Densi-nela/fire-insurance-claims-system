@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fire Insurance Claim - Document Upload</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding: 40px; background: #f4f6f8; display: flex; align-items: center; justify-content: center; min-height: 80vh; margin: 0; }
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 450px; border: 1px solid #eef0f2; }
+        h2 { color: #1e293b; margin-top: 0; font-size: 24px; font-weight: 700; margin-bottom: 24px; text-align: center; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #475569; font-size: 14px; }
+        input[type="number"] { padding: 10px; width: 100%; box-sizing: border-box; border: 1.5px solid #cbd5e1; border-radius: 6px; font-size: 15px; color: #1e293b; transition: border-color 0.2s; }
+        input[type="number"]:focus { outline: none; border-color: #3b82f6; }
+        input[type="file"] { display: block; width: 100%; box-sizing: border-box; padding: 12px; border: 2px dashed #cbd5e1; border-radius: 8px; background: #f8fafc; cursor: pointer; text-align: center; font-size: 14px; color: #64748b; }
+        input[type="file"]:hover { background: #f1f5f9; border-color: #94a3b8; }
+        button { background: #2563eb; color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: 600; width: 100%; transition: background-color 0.2s; box-shadow: 0 4px 6px -1px rgba(37,99,235,0.2); }
+        button:hover { background: #1d4ed8; }
+        #response { margin-top: 24px; padding: 16px; border-radius: 8px; display: none; font-size: 14px; line-height: 1.5; }
+        .success { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+        .error { background: #fef2f2; color: #991b1b; border: 1px solid #fca5a5; }
+        pre { white-space: pre-wrap; word-wrap: break-word; margin: 0; background: rgba(0,0,0,0.03); padding: 12px; border-radius: 6px; font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace; font-size: 12px; margin-top: 8px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>Upload Claim Document</h2>
+        <form id="uploadForm">
+            <div class="form-group">
+                <label for="claimId">Claim ID:</label>
+                <input type="number" id="claimId" value="1" min="1" required>
+            </div>
+            <div class="form-group">
+                <label for="fileInput">Select Image or Document:</label>
+                <input type="file" id="fileInput" name="file" required>
+            </div>
+            <button type="submit">Upload Attachment</button>
+        </form>
+        <div id="response"></div>
+    </div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const claimId = document.getElementById('claimId').value;
+            const fileInput = document.getElementById('fileInput');
+            const responseDiv = document.getElementById('response');
+            
+            if (fileInput.files.length === 0) {
+                alert('Please select a file.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            responseDiv.style.display = 'block';
+            responseDiv.className = '';
+            responseDiv.innerHTML = 'Uploading file to local server...';
+
+            try {
+                const response = await fetch(`http://localhost:8080/api/claims/${claimId}/attachments`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                if (response.ok) {
+                    responseDiv.className = 'success';
+                    responseDiv.innerHTML = `<strong>✨ Upload Succeeded!</strong><br>File is saved on disk. Here is the server metadata:<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                } else {
+                    responseDiv.className = 'error';
+                    responseDiv.innerHTML = `<strong>❌ Upload Failed (${response.status})</strong><br>Reason:<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                }
+            } catch (err) {
+                responseDiv.className = 'error';
+                responseDiv.innerHTML = `<strong>❌ Network Error</strong><br>Ensure your Spring Boot server is active.<pre>${err.message}</pre>`;
+            }
+        });
+    </script>
+</body>
+</html>

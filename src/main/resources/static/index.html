@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SafeHaven Insurance</title>
+    <script>
+      // Clear any stale Service Workers from previous projects on this localhost port
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+          for (const registration of registrations) {
+            registration.unregister();
+            console.log('Unregistered stale service worker:', registration);
+          }
+        });
+      }
+    </script>
+    <script type="module" crossorigin src="/assets/index-DeV--fb6.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-C28BB4bE.css">
+  </head>
+  <body>
+    <div id="app"></div>
+  </body>
+</html>
